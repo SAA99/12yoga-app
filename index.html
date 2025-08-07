@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Йога-сессии</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f8ff;
+      color: #000;
+    }
+    h1 {
+      color: #2e8b57;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 15px 0;
+      padding: 15px;
+      background: #ffffff;
+      border-radius: 10px;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+    button {
+      margin-top: 10px;
+    }
+    iframe {
+      margin-top: 10px;
+      width: 100%;
+      height: 200px;
+      border: none;
+      border-radius: 10px;
+    }
+    #streak {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Йога-сессии 🧘‍♀️</h1>
+  <ul id="sessionList"></ul>
+  <div id="streak">Дней подряд: 0</div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const sessions = [
+      { name: "Приветствие солнцу ☀️", video: "https://www.youtube.com/embed/oBU7p_wO10s" },
+      { name: "Баланс на одной ноге 🧘", video: "https://www.youtube.com/embed/2HTvZp5rPrg" },
+      { name: "Растяжка спины 🌀", video: "https://www.youtube.com/embed/XeXz8fIZDCE" },
+      { name: "Медитация 10 мин 🧠", video: "https://www.youtube.com/embed/inpok4MKVLM" },
+      { name: "Шавасана 💤", video: "https://www.youtube.com/embed/ZToicYcHIOU" }
+    ];
+
+    const saved = JSON.parse(localStorage.getItem("yogaProgress") || "{}");
+    const list = document.getElementById("sessionList");
+
+    const today = new Date().toISOString().split('T')[0];
+    let streak = +localStorage.getItem("streak") || 0;
+    let last = localStorage.getItem("lastDate");
+
+    if (last !== today) {
+      const ystr = new Date();
+      ystr.setDate(ystr.getDate() - 1);
+      if (last === ystr.toISOString().split('T')[0]) streak++;
+      else streak = 1;
+      localStorage.setItem("streak", streak);
+      localStorage.setItem("lastDate", today);
+    }
+
+    document.getElementById("streak").innerText = `Дней подряд: ${streak}`;
+
+    sessions.forEach((session, index) => {
+      const li = document.createElement("li");
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = saved[index]?.done || false;
+      checkbox.onchange = () => {
+        saved[index] = { ...saved[index], done: checkbox.checked };
+        localStorage.setItem("yogaProgress", JSON.stringify(saved));
+      };
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(session.name));
+      li.appendChild(label);
+
+      const video = document.createElement("iframe");
+      video.src = session.video;
+      li.appendChild(video);
+
+      list.appendChild(li);
+    });
+  </script>
+</body>
+</html>
